@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Five Intelligence Divisions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #070B14;
+            --bg-marketing: #0a1a2e;
+            --bg-realestate: #0a1f18;
+            --bg-consumer: #0a1f12;
+            --bg-business: #1f1a0a;
+            --bg-datascience: #0a142e;
+            --accent-cyan: #2EE9F6;
+            --accent-emerald: #10B981;
+            --accent-green: #22C55E;
+            --accent-amber: #F59E0B;
+            --accent-blue: #3B82F6;
+            --text-primary: #F4F7FF;
+            --text-secondary: #A9B3C8;
+            --glass-bg: rgba(15, 23, 42, 0.75);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: auto;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Blueprint Grid */
+        .blueprint-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.04;
+            background-image: 
+                linear-gradient(rgba(46, 233, 246, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(46, 233, 246, 0.3) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+        }
+
+        /* Noise Overlay */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.025;
+            mix-blend-mode: overlay;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-emerald), var(--accent-green), var(--accent-amber), var(--accent-blue));
+            z-index: 1000;
+            transform-origin: left;
+            transform: scaleX(0);
+        }
+
+        /* Masthead */
+        .masthead {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .masthead-badge {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            margin-bottom: 32px;
+            padding: 10px 20px;
+            border: 1px solid rgba(46, 233, 246, 0.3);
+            border-radius: 4px;
+            background: rgba(46, 233, 246, 0.05);
+        }
+
+        .masthead-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(36px, 7vw, 90px);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .masthead-title .line1 {
+            display: block;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-cyan) 50%, var(--accent-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .masthead-title .line2 {
+            display: block;
+            font-size: 0.35em;
+            font-weight: 400;
+            color: var(--text-secondary);
+            letter-spacing: 0.15em;
+            margin-top: 16px;
+        }
+
+        .masthead-subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(14px, 1.8vw, 18px);
+            font-weight: 300;
+            color: var(--text-secondary);
+            max-width: 650px;
+            text-align: center;
+            line-height: 1.7;
+            margin-bottom: 48px;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .scroll-text {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        .scroll-line {
+            width: 1px;
+            height: 50px;
+            background: linear-gradient(to bottom, var(--accent-cyan), transparent);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        /* Division Section */
+        .division-section {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .division-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            transition: opacity 1s ease;
+        }
+
+        .division-bg.marketing { background: linear-gradient(180deg, var(--bg-marketing) 0%, var(--bg-primary) 100%); }
+        .division-bg.realestate { background: linear-gradient(180deg, var(--bg-realestate) 0%, var(--bg-primary) 100%); }
+        .division-bg.consumer { background: linear-gradient(180deg, var(--bg-consumer) 0%, var(--bg-primary) 100%); }
+        .division-bg.business { background: linear-gradient(180deg, var(--bg-business) 0%, var(--bg-primary) 100%); }
+        .division-bg.datascience { background: linear-gradient(180deg, var(--bg-datascience) 0%, var(--bg-primary) 100%); }
+
+        .division-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 1500px;
+            padding: 0 48px;
+        }
+
+        .division-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            min-height: 80vh;
+        }
+
+        .division-grid.reverse {
+            direction: rtl;
+        }
+
+        .division-grid.reverse > * {
+            direction: ltr;
+        }
+
+        /* Glass Panel */
+        .glass-panel {
+            background: var(--glass-bg);
+            border: 1px solid rgba(46, 233, 246, 0.2);
+            border-radius: 20px;
+            backdrop-filter: blur(28px) saturate(140%);
+            -webkit-backdrop-filter: blur(28px) saturate(140%);
+            box-shadow: 
+                0 0 0 1px rgba(46, 233, 246, 0.06),
+                0 0 100px rgba(46, 233, 246, 0.1),
+                0 50px 100px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            padding: 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+            opacity: 0.4;
+        }
+
+        .division-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            opacity: 0.8;
+        }
+
+        .division-label.cyan { color: var(--accent-cyan); }
+        .division-label.emerald { color: var(--accent-emerald); }
+        .division-label.green { color: var(--accent-green); }
+        .division-label.amber { color: var(--accent-amber); }
+        .division-label.blue { color: var(--accent-blue); }
+
+        .division-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(26px, 3vw, 40px);
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+            line-height: 1.2;
+        }
+
+        .dashboard-count {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(46, 233, 246, 0.1);
+        }
+
+        .count-number {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(48px, 6vw, 72px);
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .count-number.cyan { color: var(--accent-cyan); text-shadow: 0 0 40px rgba(46, 233, 246, 0.4); }
+        .count-number.emerald { color: var(--accent-emerald); text-shadow: 0 0 40px rgba(16, 185, 129, 0.4); }
+        .count-number.green { color: var(--accent-green); text-shadow: 0 0 40px rgba(34, 197, 94, 0.4); }
+        .count-number.amber { color: var(--accent-amber); text-shadow: 0 0 40px rgba(245, 158, 11, 0.4); }
+        .count-number.blue { color: var(--accent-blue); text-shadow: 0 0 40px rgba(59, 130, 246, 0.4); }
+
+        .count-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .dashboard-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .dashboard-item {
+            position: relative;
+            padding: 12px 16px;
+            background: rgba(46, 233, 246, 0.03);
+            border: 1px solid rgba(46, 233, 246, 0.08);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-item:hover {
+            background: rgba(46, 233, 246, 0.08);
+            border-color: rgba(46, 233, 246, 0.2);
+            transform: translateX(4px);
+        }
+
+        /* Visual Container */
+        .visual-container {
+            position: relative;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Dashboard Mockup */
+        .dashboard-mockup {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            background: rgba(8, 12, 20, 0.95);
+            border: 1px solid rgba(46, 233, 246, 0.15);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            background: rgba(46, 233, 246, 0.06);
+            border-bottom: 1px solid rgba(46, 233, 246, 0.1);
+        }
+
+        .dashboard-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .dashboard-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dashboard-dot.red { background: #ff5f57; }
+        .dashboard-dot.yellow { background: #febc2e; }
+        .dashboard-dot.green { background: #28c840; }
+
+        .dashboard-title-text {
+            margin-left: 14px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .dashboard-content {
+            padding: 24px;
+        }
+
+        .kpi-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            flex: 1;
+            background: rgba(46, 233, 246, 0.04);
+            border: 1px solid rgba(46, 233, 246, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .kpi-card.emerald { background: rgba(16, 185, 129, 0.04); border-color: rgba(16, 185, 129, 0.1); }
+        .kpi-card.green { background: rgba(34, 197, 94, 0.04); border-color: rgba(34, 197, 94, 0.1); }
+        .kpi-card.amber { background: rgba(245, 158, 11, 0.04); border-color: rgba(245, 158, 11, 0.1); }
+        .kpi-card.blue { background: rgba(59, 130, 246, 0.04); border-color: rgba(59, 130, 246, 0.1); }
+
+        .kpi-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .kpi-value.cyan { color: var(--accent-cyan); }
+        .kpi-value.emerald { color: var(--accent-emerald); }
+        .kpi-value.green { color: var(--accent-green); }
+        .kpi-value.amber { color: var(--accent-amber); }
+        .kpi-value.blue { color: var(--accent-blue); }
+
+        .chart-area {
+            height: 140px;
+            background: rgba(46, 233, 246, 0.02);
+            border: 1px solid rgba(46, 233, 246, 0.08);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Transition Panel */
+        .transition-panel {
+            position: relative;
+            min-height: 40vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .transition-content {
+            text-align: center;
+        }
+
+        .transition-metric {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(64px, 12vw, 160px);
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+
+        .transition-metric.cyan { color: var(--accent-cyan); text-shadow: 0 0 60px rgba(46, 233, 246, 0.5); }
+        .transition-metric.emerald { color: var(--accent-emerald); text-shadow: 0 0 60px rgba(16, 185, 129, 0.5); }
+        .transition-metric.green { color: var(--accent-green); text-shadow: 0 0 60px rgba(34, 197, 94, 0.5); }
+        .transition-metric.amber { color: var(--accent-amber); text-shadow: 0 0 60px rgba(245, 158, 11, 0.5); }
+        .transition-metric.blue { color: var(--accent-blue); text-shadow: 0 0 60px rgba(59, 130, 246, 0.5); }
+
+        .transition-label {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(16px, 2vw, 24px);
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        /* Footer */
+        .footer {
+            position: relative;
+            padding: 100px 0;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .footer-line {
+            width: 100px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), var(--accent-emerald), var(--accent-green), var(--accent-amber), var(--accent-blue), transparent);
+            margin: 0 auto 40px;
+        }
+
+        .footer-tagline {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(24px, 4vw, 42px);
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+        }
+
+        .footer-subtext {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 0.2em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(46, 233, 246, 0.3);
+            border-radius: 3px;
+        }
+
+        /* Mobile */
+        @media (max-width: 968px) {
+            .division-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .division-grid.reverse {
+                direction: ltr;
+            }
+
+            .visual-container {
+                height: 350px;
+                order: -1;
+            }
+
+            .glass-panel {
+                padding: 32px;
+            }
+
+            .dashboard-list {
+                grid-template-columns: 1fr;
+            }
+
+            .division-container {
+                padding: 0 24px;
+            }
+        }
+
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Blueprint Grid -->
+    <div class="blueprint-grid"></div>
+
+    <!-- Noise Overlay -->
+    <div class="noise-overlay"></div>
+
+    <!-- Masthead -->
+    <section class="masthead" id="masthead">
+        <div class="masthead-badge">Enterprise Analytics Architecture</div>
+        <h1 class="masthead-title">
+            <span class="line1">Five Intelligence</span>
+            <span class="line1">Divisions</span>
+            <span class="line2">74 Dashboards · 8 Predictive Models · Organization-Wide</span>
+        </h1>
+        <p class="masthead-subtitle">Strategic analytics leadership across Marketing, Real Estate, Consumer Lending, Business Lending, and Data Science — transforming raw data into executive intelligence.</p>
+        <div class="scroll-indicator">
+            <span class="scroll-text">Initialize Overview</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+
+    <!-- Division 1: Marketing Intelligence -->
+    <section class="division-section" id="division1">
+        <div class="division-bg marketing"></div>
+        <div class="division-container">
+            <div class="division-grid">
+                <div class="glass-panel">
+                    <div class="division-label cyan">Division 01 / Marketing Intelligence</div>
+                    <h2 class="division-title">Marketing Intelligence Architecture</h2>
+                    <div class="dashboard-count">
+                        <span class="count-number cyan" id="count1">0</span>
+                        <span class="count-label">Dashboards Built</span>
+                    </div>
+                    <ul class="dashboard-list">
+                        <li class="dashboard-item">Marketing Scorecard</li>
+                        <li class="dashboard-item">Sales Performance</li>
+                        <li class="dashboard-item">Revenue / Expense</li>
+                        <li class="dashboard-item">Traffic Source Report</li>
+                        <li class="dashboard-item">Product Performance</li>
+                        <li class="dashboard-item">CRM Dashboard</li>
+                    </ul>
+                </div>
+                <div class="visual-container">
+                    <div class="dashboard-mockup">
+                        <div class="dashboard-header">
+                            <div class="dashboard-dots">
+                                <div class="dashboard-dot red"></div>
+                                <div class="dashboard-dot yellow"></div>
+                                <div class="dashboard-dot green"></div>
+                            </div>
+                            <span class="dashboard-title-text">Marketing Scorecard</span>
+                        </div>
+                        <div class="dashboard-content">
+                            <div class="kpi-row">
+                                <div class="kpi-card">
+                                    <div class="kpi-label">Revenue</div>
+                                    <div class="kpi-value cyan" id="rev1">$0M</div>
+                                </div>
+                                <div class="kpi-card">
+                                    <div class="kpi-label">Growth</div>
+                                    <div class="kpi-value cyan" id="growth1">+0%</div>
+                                </div>
+                                <div class="kpi-card">
+                                    <div class="kpi-label">Leads</div>
+                                    <div class="kpi-value cyan" id="leads1">0</div>
+                                </div>
+                            </div>
+                            <div class="chart-area">
+                                <svg viewBox="0 0 400 140" preserveAspectRatio="none" style="width:100%;height:100%;">
+                                    <defs>
+                                        <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#2EE9F6;stop-opacity:0.3" />
+                                            <stop offset="100%" style="stop-color:#2EE9F6;stop-opacity:0" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M0,120 Q50,100 100,90 T200,60 T300,40 T400,20 L400,140 L0,140 Z" fill="url(#grad1)" opacity="0.6"/>
+                                    <path d="M0,120 Q50,100 100,90 T200,60 T300,40 T400,20" fill="none" stroke="#2EE9F6" stroke-width="2"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Transition 1 -->
+    <section class="transition-panel" id="trans1">
+        <div class="transition-content">
+            <div class="transition-metric cyan" id="trans1num">0</div>
+            <div class="transition-label">Marketing Dashboards Deployed</div>
+        </div>
+    </section>
+
+    <!-- Division 2: Real Estate Intelligence -->
+    <section class="division-section" id="division2">
+        <div class="division-bg realestate"></div>
+        <div class="division-container">
+            <div class="division-grid reverse">
+                <div class="glass-panel">
+                    <div class="division-label emerald">Division 02 / Real Estate Intelligence</div>
+                    <h2 class="division-title">Real Estate Intelligence Platform</h2>
+                    <div class="dashboard-count">
+                        <span class="count-number emerald" id="count2">0</span>
+                        <span class="count-label">Dashboards Built</span>
+                    </div>
+                    <ul class="dashboard-list">
+                        <li class="dashboard-item">Real Estate Pipeline</li>
+                        <li class="dashboard-item">Portfolio Dashboard</li>
+                        <li class="dashboard-item">Cost Analysis</li>
+                        <li class="dashboard-item">YTD / MTD Tracking</li>
+                        <li class="dashboard-item">Branch Performance</li>
+                        <li class="dashboard-item">Budgeting Dashboard</li>
+                    </ul>
+                </div>
+                <div class="visual-container">
+                    <div class="dashboard-mockup">
+                        <div class="dashboard-header">
+                            <div class="dashboard-dots">
+                                <div class="dashboard-dot red"></div>
+                                <div class="dashboard-dot yellow"></div>
+                                <div class="dashboard-dot green"></div>
+                            </div>
+                            <span class="dashboard-title-text">Portfolio Dashboard</span>
+                        </div>
+                        <div class="dashboard-content">
+                            <div class="kpi-row">
+                                <div class="kpi-card emerald">
+                                    <div class="kpi-label">Portfolio Value</div>
+                                    <div class="kpi-value emerald" id="port2">$0M</div>
+                                </div>
+                                <div class="kpi-card emerald">
+                                    <div class="kpi-label">Occupancy</div>
+                                    <div class="kpi-value emerald" id="occ2">0%</div>
+                                </div>
+                                <div class="kpi-card emerald">
+                                    <div class="kpi-label">ROI</div>
+                                    <div class="kpi-value emerald" id="roi2">+0%</div>
+                                </div>
+                            </div>
+                            <div class="chart-area">
+                                <svg viewBox="0 0 400 140" preserveAspectRatio="none" style="width:100%;height:100%;">
+                                    <defs>
+                                        <linearGradient id="grad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#10B981;stop-opacity:0.3" />
+                                            <stop offset="100%" style="stop-color:#10B981;stop-opacity:0" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M0,100 Q80,90 160,70 T320,40 T400,30 L400,140 L0,140 Z" fill="url(#grad2)" opacity="0.6"/>
+                                    <path d="M0,100 Q80,90 160,70 T320,40 T400,30" fill="none" stroke="#10B981" stroke-width="2"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Transition 2 -->
+    <section class="transition-panel" id="trans2">
+        <div class="transition-content">
+            <div class="transition-metric emerald" id="trans2num">0</div>
+            <div class="transition-label">Real Estate Dashboards Deployed</div>
+        </div>
+    </section>
+
+    <!-- Division 3: Consumer Lending -->
+    <section class="division-section" id="division3">
+        <div class="division-bg consumer"></div>
+        <div class="division-container">
+            <div class="division-grid">
+                <div class="glass-panel">
+                    <div class="division-label green">Division 03 / Consumer Lending Analytics</div>
+                    <h2 class="division-title">Consumer Lending Analytics Platform</h2>
+                    <div class="dashboard-count">
+                        <span class="count-number green" id="count3">0</span>
+                        <span class="count-label">Dashboards Built</span>
+                    </div>
+                    <ul class="dashboard-list">
+                        <li class="dashboard-item">BOD Dashboard</li>
+                        <li class="dashboard-item">Finance Committee</li>
+                        <li class="dashboard-item">Indirect / Direct</li>
+                        <li class="dashboard-item">Cost Projection</li>
+                        <li class="dashboard-item">TAT Dashboard</li>
+                        <li class="dashboard-item">Product Portfolio</li>
+                    </ul>
+                </div>
+                <div class="visual-container">
+                    <div class="dashboard-mockup">
+                        <div class="dashboard-header">
+                            <div class="dashboard-dots">
+                                <div class="dashboard-dot red"></div>
+                                <div class="dashboard-dot yellow"></div>
+                                <div class="dashboard-dot green"></div>
+                            </div>
+                            <span class="dashboard-title-text">Lending Performance</span>
+                        </div>
+                        <div class="dashboard-content">
+                            <div class="kpi-row">
+                                <div class="kpi-card green">
+                                    <div class="kpi-label">Loan Volume</div>
+                                    <div class="kpi-value green" id="loan3">$0M</div>
+                                </div>
+                                <div class="kpi-card green">
+                                    <div class="kpi-label">Approval Rate</div>
+                                    <div class="kpi-value green" id="app3">0%</div>
+                                </div>
+                                <div class="kpi-card green">
+                                    <div class="kpi-label">TAT (hrs)</div>
+                                    <div class="kpi-value green" id="tat3">0</div>
+                                </div>
+                            </div>
+                            <div class="chart-area">
+                                <svg viewBox="0 0 400 140" preserveAspectRatio="none" style="width:100%;height:100%;">
+                                    <defs>
+                                        <linearGradient id="grad3" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#22C55E;stop-opacity:0.3" />
+                                            <stop offset="100%" style="stop-color:#22C55E;stop-opacity:0" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M0,110 Q60,100 120,85 T240,55 T400,25 L400,140 L0,140 Z" fill="url(#grad3)" opacity="0.6"/>
+                                    <path d="M0,110 Q60,100 120,85 T240,55 T400,25" fill="none" stroke="#22C55E" stroke-width="2"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Transition 3 -->
+    <section class="transition-panel" id="trans3">
+        <div class="transition-content">
+            <div class="transition-metric green" id="trans3num">0</div>
+            <div class="transition-label">Lending Dashboards Deployed</div>
+        </div>
+    </section>
+
+    <!-- Division 4: Business Lending -->
+    <section class="division-section" id="division4">
+        <div class="division-bg business"></div>
+        <div class="division-container">
+            <div class="division-grid reverse">
+                <div class="glass-panel">
+                    <div class="division-label amber">Division 04 / Business Lending Intelligence</div>
+                    <h2 class="division-title">Business Lending Intelligence System</h2>
+                    <div class="dashboard-count">
+                        <span class="count-number amber" id="count4">0</span>
+                        <span class="count-label">Dashboards Built</span>
+                    </div>
+                    <ul class="dashboard-list">
+                        <li class="dashboard-item">Business Loans Dashboard</li>
+                        <li class="dashboard-item">Branch Analysis</li>
+                        <li class="dashboard-item">Loan Runoff Report</li>
+                        <li class="dashboard-item">Risk Tracking</li>
+                        <li class="dashboard-item">Onboarding Dashboard</li>
+                        <li class="dashboard-item">Product Portfolio</li>
+                    </ul>
+                </div>
+                <div class="visual-container">
+                    <div class="dashboard-mockup">
+                        <div class="dashboard-header">
+                            <div class="dashboard-dots">
+                                <div class="dashboard-dot red"></div>
+                                <div class="dashboard-dot yellow"></div>
+                                <div class="dashboard-dot green"></div>
+                            </div>
+                            <span class="dashboard-title-text">Business Loan Analytics</span>
+                        </div>
+                        <div class="dashboard-content">
+                            <div class="kpi-row">
+                                <div class="kpi-card amber">
+                                    <div class="kpi-label">Commercial</div>
+                                    <div class="kpi-value amber" id="comm4">$0M</div>
+                                </div>
+                                <div class="kpi-card amber">
+                                    <div class="kpi-label">Risk Score</div>
+                                    <div class="kpi-value amber" id="risk4">0</div>
+                                </div>
+                                <div class="kpi-card amber">
+                                    <div class="kpi-label">Runoff</div>
+                                    <div class="kpi-value amber" id="run4">0%</div>
+                                </div>
+                            </div>
+                            <div class="chart-area">
+                                <svg viewBox="0 0 400 140" preserveAspectRatio="none" style="width:100%;height:100%;">
+                                    <defs>
+                                        <linearGradient id="grad4" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#F59E0B;stop-opacity:0.3" />
+                                            <stop offset="100%" style="stop-color:#F59E0B;stop-opacity:0" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M0,80 Q100,70 200,60 T400,50 L400,140 L0,140 Z" fill="url(#grad4)" opacity="0.6"/>
+                                    <path d="M0,80 Q100,70 200,60 T400,50" fill="none" stroke="#F59E0B" stroke-width="2"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Transition 4 -->
+    <section class="transition-panel" id="trans4">
+        <div class="transition-content">
+            <div class="transition-metric amber" id="trans4num">0</div>
+            <div class="transition-label">Business Lending Dashboards Deployed</div>
+        </div>
+    </section>
+
+    <!-- Division 5: Data Science -->
+    <section class="division-section" id="division5">
+        <div class="division-bg datascience"></div>
+        <div class="division-container">
+            <div class="division-grid">
+                <div class="glass-panel">
+                    <div class="division-label blue">Division 05 / Data Science Systems</div>
+                    <h2 class="division-title">Predictive Intelligence Systems</h2>
+                    <div class="dashboard-count">
+                        <span class="count-number blue" id="count5">0</span>
+                        <span class="count-label">Advanced Models Built</span>
+                    </div>
+                    <ul class="dashboard-list">
+                        <li class="dashboard-item">Credit Risk Scoring</li>
+                        <li class="dashboard-item">Churn Prediction</li>
+                        <li class="dashboard-item">Branch Site Selection</li>
+                        <li class="dashboard-item">Recommendation Engine</li>
+                        <li class="dashboard-item">Fraud Detection</li>
+                        <li class="dashboard-item">Customer Segmentation</li>
+                        <li class="dashboard-item">NLP Classification</li>
+                        <li class="dashboard-item">Predictive Maintenance</li>
+                    </ul>
+                </div>
+                <div class="visual-container">
+                    <div class="dashboard-mockup">
+                        <div class="dashboard-header">
+                            <div class="dashboard-dots">
+                                <div class="dashboard-dot red"></div>
+                                <div class="dashboard-dot yellow"></div>
+                                <div class="dashboard-dot green"></div>
+                            </div>
+                            <span class="dashboard-title-text">Model Performance</span>
+                        </div>
+                        <div class="dashboard-content">
+                            <div class="kpi-row">
+                                <div class="kpi-card blue">
+                                    <div class="kpi-label">Accuracy</div>
+                                    <div class="kpi-value blue" id="acc5">0%</div>
+                                </div>
+                                <div class="kpi-card blue">
+                                    <div class="kpi-label">Precision</div>
+                                    <div class="kpi-value blue" id="prec5">0%</div>
+                                </div>
+                                <div class="kpi-card blue">
+                                    <div class="kpi-label">Recall</div>
+                                    <div class="kpi-value blue" id="rec5">0%</div>
+                                </div>
+                            </div>
+                            <div class="chart-area">
+                                <svg viewBox="0 0 400 140" preserveAspectRatio="none" style="width:100%;height:100%;">
+                                    <defs>
+                                        <linearGradient id="grad5" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:0.3" />
+                                            <stop offset="100%" style="stop-color:#3B82F6;stop-opacity:0" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M0,90 Q80,80 160,50 T320,30 T400,20 L400,140 L0,140 Z" fill="url(#grad5)" opacity="0.6"/>
+                                    <path d="M0,90 Q80,80 160,50 T320,30 T400,20" fill="none" stroke="#3B82F6" stroke-width="2"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Transition 5 -->
+    <section class="transition-panel" id="trans5">
+        <div class="transition-content">
+            <div class="transition-metric blue" id="trans5num">0</div>
+            <div class="transition-label">Predictive Systems Deployed</div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-line"></div>
+        <div class="footer-tagline">I didn't build reports.<br>I built intelligence systems.</div>
+        <div class="footer-subtext">Enterprise Analytics Architecture · Organization-Wide Impact</div>
+    </footer>
+
+    <script>
+        // Register GSAP plugins
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Progress Bar
+        gsap.to('#progressBar', {
+            scaleX: 1,
+            ease: 'none',
+            scrollTrigger: {
+                trigger: 'body',
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: 0.3
+            }
+        });
+
+        // Masthead Animation
+        gsap.from('.masthead-badge', {
+            opacity: 0,
+            y: 30,
+            duration: 0.8,
+            delay: 0.2,
+            ease: 'power3.out'
+        });
+
+        gsap.from('.masthead-title .line1', {
+            opacity: 0,
+            y: 50,
+            duration: 1,
+            delay: 0.4,
+            stagger: 0.1,
+            ease: 'power3.out'
+        });
+
+        gsap.from('.masthead-subtitle', {
+            opacity: 0,
+            y: 30,
+            duration: 0.8,
+            delay: 0.8,
+            ease: 'power3.out'
+        });
+
+        gsap.from('.scroll-indicator', {
+            opacity: 0,
+            duration: 0.6,
+            delay: 1.2,
+            ease: 'power2.out'
+        });
+
+        // Masthead scroll fade
+        gsap.to('.masthead-content', {
+            opacity: 0,
+            y: -60,
+            filter: 'blur(8px)',
+            scrollTrigger: {
+                trigger: '.masthead',
+                start: 'top top',
+                end: 'bottom top',
+                scrub: 1
+            }
+        });
+
+        // Division 1: Marketing (15 dashboards)
+        ScrollTrigger.create({
+            trigger: '#division1',
+            start: 'top 60%',
+            onEnter: () => {
+                gsap.to('#count1', { innerHTML: 15, duration: 2, snap: { innerHTML: 1 }, ease: 'power2.out' });
+                gsap.to('#rev1', { innerHTML: '$4.2M', duration: 1.5, ease: 'power2.out' });
+                gsap.to('#growth1', { innerHTML: '+23%', duration: 1.5, delay: 0.2, ease: 'power2.out' });
+                gsap.to('#leads1', { innerHTML: '1,847', duration: 1.5, delay: 0.4, ease: 'power2.out' });
+            },
+            once: true
+        });
+
+        gsap.from('#division1 .glass-panel', {
+            x: -80, opacity: 0, scale: 0.95, filter: 'blur(8px)',
+            duration: 1, ease: 'power3.out',
+            scrollTrigger: { trigger: '#division1', start: 'top 70%', toggleActions: 'play none none reverse' }
+        });
+
+        gsap.from('#division1 .dashboard-mockup', {
+            x: 80, opacity: 0, scale: 0.9, rotateY: -10,
+            duration: 1.2, ease: 'power3.out',
+            scrollTrigger: { trigger: '#division1', start: 'top 70%', toggleActions: 'play none none reverse' }
+        });
+
+        // Transition 1
+        ScrollTrigger.create({
+            trigger: '#trans1',
+            start: 'top 60%',
+            onEnter: () => {
+                gsap.to('#trans1num', { innerHTML: 15, duration: 2, snap: { innerHTML: 1 }, ease: 'power2.out' });
+            },
+            once: true
+        });
+
+        gsap.from('#trans1 .transition-metric', {
+            scale: 0.8, opacity: 0, duration: 1, ease: 'power3.out',
+            scrollTrigger: { trigger: '#trans1', start: 'top 70%', toggleActions: 'play none none reverse' }
+        });
+
+        // Division 2: Real Estate (18 dashboards)
+        ScrollTrigger.create({
+            trigger: '#division2',
+            start: 'top 60%',
+            onEnter: () => {
+                gsap.to('#count2', { innerHTML: 18, duration: 2, snap: { innerHTML: 1 }, ease: 'power2.out' });
+                gsap.to('#port2', { innerHTML: '$127M', duration: 1.5, ease: 'power2.out' });
+                gsap.to('#occ2', { innerHTML: '94%', duration: 1.5, delay: 0.2, ease: 'power2.out' });
+                gsap.to('#roi2', { innerHTML: '+12%', duration: 1.5, delay: 0.4, ease: 'power2.out' });
+            },
+            once: true
+        });
+
+        gsap.from('#division2 .glass-panel', {
+            x: 80, opacity: 0, scale: 0.95, filter: 'blur(8px)',
+            duration: 1, ease: 'power3.out',
+            scrollTrigger: { trigger: '#division2', start: 'top 70%', toggleActions: 'play none none reverse' }
+        });
+
+        gsap.from('#division2 .dashboard-mockup', {
+            x: -80, opacity: 0, scale: 0.9, rotateY: 10,
+            duration: 1.2, ease: 'power3.out',
+            scrollTrigger: { trigger: '#division2', start: 'top 70%', toggleActions: 'play none none reverse' }
+        });
+
+        // Transition 2
+        ScrollTrigger.create({
+            trigger: '#trans2',
+            start: 'top 60%',
+            onEnter: () => {
+                gsap.to('#trans2num', { innerHTML: 18, duration: 2, snap: { innerHTML: 1 }, ease: 'power2.out' });
+            },
+            once: true
+        });
+
+        // Division 3: Consumer Lending (21 dashboards)
+        ScrollTrigger.create({
+            trigger: '#division3',
+            start: 'top 60%',
+            onEnter: () => {
+                gsap.to('#count3', { innerHTML: 21, duration: 2, snap: { innerHTML: 1 }, ease: 'power2.out' });
+                gsap.to('#loan3', { innerHTML: '$89M', duration: 1.5, ease: 'power2.out' });
+                gsap.to('#app3', { innerHTML: '78%', duration: 1.5, delay: 0.2, ease: 'power2.out' });
+                gsap.to('#tat3', { innerHTML: '4.2', duration: 1.5, delay: 0.4, ease: 'power2.out' });
+            },
+            once: true
+        });
+
+        gsap.from('#division3 .glass-panel', {
+            x: -80, opacity: 0, scale: 0.95, filter: 'blur(8px)',
+            duration: 1, ease: 'power3.out',
+            scrollTrigger: { trigger: '#division3', start: 'top 70%', toggleActions: 'play none none reverse' }
+        });
+
+        gsap.from('#division3 .dashboard-mockup', {
+            x: 80, opacity: 0, scale: 0.9, rotateY: -10,
+            duration: 1.2, ease: 'power3.out',
+            scrollTrigger: { trigger: '#division3', start: 'top 70%', toggleActions: 'play none none reverse' }
+        });
+
+        // Transition 3
+        ScrollTrigger.create({
+            trigger: '#trans3',
+            start: 'top 60%',
+            onEnter: () => {
+                gsap.to('#trans3num', { innerHTML: 21, duration: 2, snap: { innerHTML: 1 }, ease: 'power2.out' });
+            },
+            once: true
+        });
+
+        // Division 4: Business Lending (12 dashboards)
+        ScrollTrigger.create({
+            trigger: '#division4',
+            start: 'top 60%',
+            onEnter: () => {
+                gsap.to('#count4', { innerHTML: 12, duration: 2, snap: { innerHTML: 1 }, ease: 'power2.out' });
+                gsap.to('#comm4', { innerHTML: '$45M', duration: 1.5, ease: 'power2.out' });
+                gsap.to('#risk4', { innerHTML: '2.4', duration: 1.5, delay: 0.2, ease: 'power2.out' });
+                gsap.to('#run4', { innerHTML: '8%', duration: 1.5, delay: 0.4, ease: 'power2.out' });
+            },
+            once: true
+        });
+
+        gsap.from('#division4 .glass-panel', {
+            x: 80, opacity: 0, scale: 0.95, filter: 'blur(8px)',
+            duration: 1, ease: 'power3.out',
+            scrollTrigger: { trigger: '#division4', start: 'top 70%', toggleActions: 'play none none reverse' }
+        });
+
+        gsap.from('#division4 .dashboard-mockup', {
+            x: -80, opacity: 0, scale: 0.9, rotateY: 10,
+            duration: 1.2, ease: 'power3.out',
+            scrollTrigger: { trigger: '#division4', start: 'top 70%', toggleActions: 'play none none reverse' }
+        });
+
+        // Transition 4
+        ScrollTrigger.create({
+            trigger: '#trans4',
+            start: 'top 60%',
+            onEnter: () => {
+                gsap.to('#trans4num', { innerHTML: 12, duration: 2, snap: { innerHTML: 1 }, ease: 'power2.out' });
+            },
+            once: true
+        });
+
+        // Division 5: Data Science (8 models)
+        ScrollTrigger.create({
+            trigger: '#division5',
+            start: 'top 60%',
+            onEnter: () => {
+                gsap.to('#count5', { innerHTML: 8, duration: 2, snap: { innerHTML: 1 }, ease: 'power2.out' });
+                gsap.to('#acc5', { innerHTML: '94%', duration: 1.5, ease: 'power2.out' });
+                gsap.to('#prec5', { innerHTML: '91%', duration: 1.5, delay: 0.2, ease: 'power2.out' });
+                gsap.to('#rec5', { innerHTML: '89%', duration: 1.5, delay: 0.4, ease: 'power2.out' });
+            },
+            once: true
+        });
+
+        gsap.from('#division5 .glass-panel', {
+            x: -80, opacity: 0, scale: 0.95, filter: 'blur(8px)',
+            duration: 1, ease: 'power3.out',
+            scrollTrigger: { trigger: '#division5', start: 'top 70%', toggleActions: 'play none none reverse' }
+        });
+
+        gsap.from('#division5 .dashboard-mockup', {
+            x: 80, opacity: 0, scale: 0.9, rotateY: -10,
+            duration: 1.2, ease: 'power3.out',
+            scrollTrigger: { trigger: '#division5', start: 'top 70%', toggleActions: 'play none none reverse' }
+        });
+
+        // Transition 5
+        ScrollTrigger.create({
+            trigger: '#trans5',
+            start: 'top 60%',
+            onEnter: () => {
+                gsap.to('#trans5num', { innerHTML: 8, duration: 2, snap: { innerHTML: 1 }, ease: 'power2.out' });
+            },
+            once: true
+        });
+
+        // Background color transitions
+        gsap.to('body', {
+            backgroundColor: '#0a1a2e',
+            scrollTrigger: { trigger: '#division1', start: 'top 80%', end: 'top 20%', scrub: 1 }
+        });
+
+        gsap.to('body', {
+            backgroundColor: '#0a1f18',
+            scrollTrigger: { trigger: '#division2', start: 'top 80%', end: 'top 20%', scrub: 1 }
+        });
+
+        gsap.to('body', {
+            backgroundColor: '#0a1f12',
+            scrollTrigger: { trigger: '#division3', start: 'top 80%', end: 'top 20%', scrub: 1 }
+        });
+
+        gsap.to('body', {
+            backgroundColor: '#1f1a0a',
+            scrollTrigger: { trigger: '#division4', start: 'top 80%', end: 'top 20%', scrub: 1 }
+        });
+
+        gsap.to('body', {
+            backgroundColor: '#0a142e',
+            scrollTrigger: { trigger: '#division5', start: 'top 80%', end: 'top 20%', scrub: 1 }
+        });
+
+        // Footer animation
+        gsap.from('.footer', {
+            opacity: 0, y: 40, duration: 1, ease: 'power3.out',
+            scrollTrigger: { trigger: '.footer', start: 'top 80%', toggleActions: 'play none none reverse' }
+        });
+    </script>
+</body>
+</html>
